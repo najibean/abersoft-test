@@ -9,11 +9,10 @@ app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 
 app.use((err, req, res, next) => {
-	const isDev = req.app.get('env') === 'development'
-	res.locals.error = err
-	console.log('Error:', err.message)
-	const message = isDev ? err.stack : 'Internal server error'
-	res.status(err.status || 500).json({ message })
+	const isProd = process.env.NODE_ENV === 'production'
+	console.error('Error:', err.message)
+	let message = isProd ? 'Internal server error' : err.message
+	return res.status(err.status || 500).json({ message })
 })
 
 app.listen(port, () => {
