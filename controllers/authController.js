@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const { checkHash } = require('./../helpers/password')
+const { getHash, checkHash } = require('./../helpers/password')
 const models = require('../models')
 const { Worker } = models
 
@@ -7,10 +7,7 @@ exports.login = async (req, res, next) => {
 	try {
 		const { email, password } = req.body
 		const worker = await Worker.findOne({
-			where: { email },
-			attributes: {
-				exclude: ['password']
-			}
+			where: { email }
 		})
 
 		if (!worker) {
@@ -51,7 +48,7 @@ exports.logout = async (req, res, next) => {
 				token: null
 			},
 			{
-				where: { id: req.user.id }
+				where: { id: req.worker.id }
 			}
 		)
 
@@ -87,6 +84,43 @@ exports.profile = async (req, res, next) => {
 					name: profileWorker.name
 				}
 			}
+		})
+	} catch (err) {
+		console.log(err)
+		next(err)
+	}
+}
+
+exports.changePassword = async (req, res, next) => {
+	try {
+		const { email, newPassword, retypeNewPassword } = req.body
+
+		const workerEmail = await Worker.findOne({
+			where: { email }
+		})
+		if (!workerEmail) {
+			return res.status(400).json({
+				message: 'Email not found'
+			})
+		}
+
+		if (newPassword !== retypeNewPassword) {
+			return res.status(400).json({
+				message: 'Password not match'
+			})
+		}
+
+		await Worker.update(
+			{ password: getHash(newPassword) },
+			{
+				where: { id: req.worker.id }
+			}
+		)
+
+		return res.status(200).json({
+			statusCode: 200,
+			message: 'Success change password',
+			result: null
 		})
 	} catch (err) {
 		console.log(err)
