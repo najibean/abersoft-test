@@ -1,8 +1,7 @@
 const router = require('express').Router()
 const { isAuthenticate } = require('../middlewares/authMiddleware')
+const { addWorker } = require('./../controllers/customerController')
 
-router.get('/test', (req, res) => {
-	return res.sendStatus(200)
-})
+router.post('/worker/add', isAuthenticate, addWorker)
 
 module.exports = router

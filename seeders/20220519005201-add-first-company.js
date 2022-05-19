@@ -1,7 +1,5 @@
 'use strict'
 
-const { test } = require('../config/database')
-const { getHash } = require('../helpers/password')
 module.exports = {
 	async up(queryInterface, Sequelize) {
 		await queryInterface.bulkInsert('Companies', [

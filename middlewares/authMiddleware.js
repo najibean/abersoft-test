@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const models = require('../models')
 
-const { Worker } = models
+const { User } = models
 
 exports.isAuthenticate = (req, res, next) => {
 	if (!req.headers.authorization) {
@@ -24,17 +24,17 @@ exports.isAuthenticate = (req, res, next) => {
 				return res.status(401).send('Invalid Token')
 			} else {
 				try {
-					const worker = await Worker.findOne({
+					const user = await User.findOne({
 						where: {
 							email: payload.email
 						}
 					})
 
-					if (worker.dataValues.token !== splitToken[1]) {
+					if (user.dataValues.token !== splitToken[1]) {
 						return res.status(401).send('Invalid Token')
 					}
 
-					req.worker = worker
+					req.user = user
 					next()
 				} catch (error) {
 					next(error)
