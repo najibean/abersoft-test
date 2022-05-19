@@ -3,7 +3,7 @@ const { checkHash } = require('./../helpers/password')
 const models = require('../models')
 const { Worker } = models
 
-export const login = async (req, res, next) => {
+exports.login = async (req, res, next) => {
 	try {
 		const { email, password } = req.body
 		const worker = await Worker.findOne({
@@ -44,7 +44,7 @@ export const login = async (req, res, next) => {
 	}
 }
 
-export const logout = async (req, res, next) => {
+exports.logout = async (req, res, next) => {
 	try {
 		Worker.update(
 			{
