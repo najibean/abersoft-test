@@ -57,10 +57,39 @@ exports.logout = async (req, res, next) => {
 
 		return res.status(200).json({
 			statusCode: 200,
-			message: 'Logout Succes',
+			message: 'Logout Success',
 			result: null
 		})
 	} catch (err) {
-		return next(err)
+		console.log(err)
+		next(err)
+	}
+}
+
+exports.profile = async (req, res, next) => {
+	try {
+		const profileWorker = await Worker.findOne({
+			where: { email: req.worker.email }
+		})
+		if (!profileWorker) {
+			return res.status(400).json({
+				message: 'Worker not found'
+			})
+		}
+
+		return res.status(200).json({
+			statusCode: 200,
+			message: 'Success',
+			result: {
+				profile: {
+					id: profileWorker.id,
+					email: profileWorker.email,
+					name: profileWorker.name
+				}
+			}
+		})
+	} catch (err) {
+		console.log(err)
+		next(err)
 	}
 }

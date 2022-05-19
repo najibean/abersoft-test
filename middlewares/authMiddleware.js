@@ -24,21 +24,17 @@ exports.isAuthenticate = (req, res, next) => {
 				return res.status(401).send('Invalid Token')
 			} else {
 				try {
-					const user = await Worker.findOne({
+					const worker = await Worker.findOne({
 						where: {
-							id: payload.id
+							email: payload.email
 						}
 					})
 
-					if (!user) {
+					if (worker.dataValues.token !== splitToken[1]) {
 						return res.status(401).send('Invalid Token')
 					}
 
-					if (user.dataValues.token !== splitToken[1]) {
-						return res.status(401).send('Invalid Token')
-					}
-
-					req.user = user
+					req.worker = worker
 					next()
 				} catch (error) {
 					next(error)
