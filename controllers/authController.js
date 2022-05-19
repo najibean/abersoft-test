@@ -1,30 +1,30 @@
 const jwt = require('jsonwebtoken')
 const { getHash, checkHash } = require('./../helpers/password')
 const models = require('../models')
-const { Worker } = models
+const { User } = models
 
 exports.login = async (req, res, next) => {
 	try {
 		const { email, password } = req.body
-		const worker = await Worker.findOne({
+		const user = await User.findOne({
 			where: { email }
 		})
 
-		if (!worker) {
+		if (!user) {
 			return res.status(404).send('Email not found')
 		}
 
-		if (!checkHash(password, worker.password)) {
+		if (!checkHash(password, user.password)) {
 			return res.status(400).send('Your password is wrong')
 		}
 
 		const payload = {
-			email: worker.dataValues.email,
-			name: worker.dataValues.name
+			email: user.dataValues.email,
+			name: user.dataValues.name
 		}
 
 		const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '30d' })
-		Worker.update({ token }, { where: { id: worker.id } })
+		User.update({ token }, { where: { id: user.id } })
 
 		return res.status(200).json({
 			statusCode: 200,
@@ -37,18 +37,18 @@ exports.login = async (req, res, next) => {
 		})
 	} catch (err) {
 		console.log(err)
-		return next(err)
+		next(err)
 	}
 }
 
 exports.logout = async (req, res, next) => {
 	try {
-		Worker.update(
+		User.update(
 			{
 				token: null
 			},
 			{
-				where: { id: req.worker.id }
+				where: { id: req.user.id }
 			}
 		)
 
@@ -65,10 +65,10 @@ exports.logout = async (req, res, next) => {
 
 exports.profile = async (req, res, next) => {
 	try {
-		const profileWorker = await Worker.findOne({
-			where: { email: req.worker.email }
+		const profileUser = await User.findOne({
+			where: { email: req.user.email }
 		})
-		if (!profileWorker) {
+		if (!profileUser) {
 			return res.status(400).json({
 				message: 'Worker not found'
 			})
@@ -79,9 +79,9 @@ exports.profile = async (req, res, next) => {
 			message: 'Success',
 			result: {
 				profile: {
-					id: profileWorker.id,
-					email: profileWorker.email,
-					name: profileWorker.name
+					id: profileUser.id,
+					email: profileUser.email,
+					name: profileUser.name
 				}
 			}
 		})
@@ -95,10 +95,10 @@ exports.changePassword = async (req, res, next) => {
 	try {
 		const { email, newPassword, retypeNewPassword } = req.body
 
-		const workerEmail = await Worker.findOne({
+		const userEmail = await User.findOne({
 			where: { email }
 		})
-		if (!workerEmail) {
+		if (!userEmail) {
 			return res.status(400).json({
 				message: 'Email not found'
 			})
@@ -110,7 +110,7 @@ exports.changePassword = async (req, res, next) => {
 			})
 		}
 
-		await Worker.update(
+		await User.update(
 			{ password: getHash(newPassword) },
 			{
 				where: { id: req.worker.id }
