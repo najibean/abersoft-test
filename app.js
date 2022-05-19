@@ -1,5 +1,5 @@
 const express = require('express')
-
+const router = require('./routes/worker')
 require('dotenv').config()
 
 const app = express()
@@ -7,6 +7,9 @@ const port = process.env.PORT || 3003
 
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
+
+app.use('/v1', router)
+app.use((req, res) => res.status(404).send('Page not found'))
 
 app.use((err, req, res, next) => {
 	const isProd = process.env.NODE_ENV === 'production'

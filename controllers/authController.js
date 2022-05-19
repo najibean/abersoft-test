@@ -1,46 +1,43 @@
+const jwt = require('jsonwebtoken')
+const { checkHash } = require('./../helpers/password')
 const models = require('../models')
 const { Worker } = models
 
 export const login = async (req, res, next) => {
 	try {
-		const { employee_id, password } = req.body
-		const user = await Worker.findOne({
-			where: { employee_id },
+		const { email, password } = req.body
+		const worker = await Worker.findOne({
+			where: { email },
 			attributes: {
-				exclude: ['role']
-			},
-			include: [
-				{
-					model: Role,
-					as: 'access_role',
-					attributes: ['id', 'name']
-				}
-			]
+				exclude: ['password']
+			}
 		})
 
-		if (!user) {
-			return res.status(404).json(errorResponse('Employee ID not found'))
+		if (!worker) {
+			return res.status(404).send('Email not found')
 		}
 
-		if (!checkHash(password, user.password)) {
-			return res.status(400).json(errorResponse('Your password is wrong'))
+		if (!checkHash(password, worker.password)) {
+			return res.status(400).send('Your password is wrong')
 		}
 
 		const payload = {
-			id: user.dataValues.id,
-			email: user.dataValues.email
+			email: worker.dataValues.email,
+			name: worker.dataValues.name
 		}
 
 		const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '30d' })
-		user.update({
-			last_login: new Date(),
-			token
+		Worker.update({ token }, { where: { id: worker.id } })
+
+		return res.status(200).json({
+			statusCode: 200,
+			message: 'Success',
+			result: {
+				login: {
+					token
+				}
+			}
 		})
-
-		delete user.dataValues.password
-		user.dataValues['token'] = token
-
-		return res.status(200).json(user)
 	} catch (err) {
 		console.log(err)
 		return next(err)
@@ -49,10 +46,9 @@ export const login = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
 	try {
-		const token = null
-		await Worker.update(
+		Worker.update(
 			{
-				token
+				token: null
 			},
 			{
 				where: { id: req.user.id }
@@ -60,8 +56,9 @@ export const logout = async (req, res, next) => {
 		)
 
 		return res.status(200).json({
-			message: 'You have been logout',
-			token
+			statusCode: 200,
+			message: 'Logout Succes',
+			result: null
 		})
 	} catch (err) {
 		return next(err)
