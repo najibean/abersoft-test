@@ -5,7 +5,6 @@ exports.addWorker = async (req, res, next) => {
 	try {
 		const { customerId, workerId, email, isActive } = req.body
 
-		console.log(req.body)
 		const customer = await Customer.findOne({
 			where: { id: customerId }
 		})
