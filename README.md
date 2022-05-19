@@ -7,7 +7,7 @@
 - put the credential of your database on env (like in .env.example file)
 - npx sequelize-cli init
 - npx sequelize-cli db:migrate
-- npx sequelize-cli db:seed
+- npx sequelize-cli db:seed:all
 - run the app with "npm start" on terminal
 
 ## API has been builded
